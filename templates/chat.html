@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - {{ current_user.username }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="user-info">
+                <div class="user-avatar">{{ current_user.username[0].upper() }}</div>
+                <span class="username">{{ current_user.username }}</span>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+        
+        <div class="user-list">
+            <h3>Users</h3>
+            <div id="users-container" data-current-user-id="{{ current_user.id }}">
+                {% for user in users %}
+                <div class="user-item" data-user-id="{{ user.id }}" onclick="selectUser({{ user.id }}, '{{ user.username }}')">
+                    <div class="user-avatar-small">{{ user.username[0].upper() }}</div>
+                    <div class="user-details">
+                        <span class="user-name">{{ user.username }}</span>
+                        <span class="user-status {% if user.is_online %}online{% else %}offline{% endif %}">
+                            <i class="fas fa-circle"></i> 
+                            {% if user.is_online %}Online{% else %}Offline{% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area">
+        <div class="chat-header" id="chat-header" style="display: none;">
+            <div class="chat-user-info">
+                <div class="user-avatar-small" id="chat-avatar"></div>
+                <div>
+                    <div class="chat-username" id="chat-username"></div>
+                    <div class="chat-status" id="chat-status">
+                        <i class="fas fa-circle"></i> <span id="status-text">Offline</span>
+                    </div>
+                </div>
+            </div>
+            <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                <span class="typing-text">typing...</span>
+            </div>
+        </div>
+
+        <div class="welcome-screen" id="welcome-screen">
+            <div class="welcome-content">
+                <i class="fas fa-comments"></i>
+                <h2>Welcome to Chat App!</h2>
+                <p>Select a user from the sidebar to start chatting</p>
+            </div>
+        </div>
+
+        <div class="messages-container" id="messages-container" style="display: none;">
+            <div class="messages" id="messages"></div>
+        </div>
+
+        <div class="message-input-container" id="message-input-container" style="display: none;">
+            <form id="message-form" onsubmit="sendMessage(event)">
+                <input 
+                    type="text" 
+                    id="message-input" 
+                    placeholder="Type a message..." 
+                    autocomplete="off"
+                    oninput="handleTyping()"
+                >
+                <button type="submit" class="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}
+
