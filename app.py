@@ -218,7 +218,9 @@ def handle_typing(data):
         "is_typing": data.get("is_typing", False)
     }, broadcast=True)
 
+# Initialize database tables (runs on module import, needed for Gunicorn)
+with app.app_context():
+    db.create_all()
+
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     socketio.run(app, debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
